@@ -10,6 +10,7 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -33,7 +34,7 @@ public class UserController {
     @PutMapping(value = "/users/{userId}")
     public User update(@Valid @RequestBody User user, @PathVariable Long userId) {
         User checkedUser = getNameIfEmpty(user);
-        final List<User> userById = users.stream().filter(u -> Objects.equals(u.getId(), userId)).toList();
+        final List<User> userById = users.stream().filter(u -> Objects.equals(u.getId(), userId)).collect(Collectors.toList());
         if (userById.size() == 0) {
             log.error("There is no any user!");
             throw new NotFoundException();

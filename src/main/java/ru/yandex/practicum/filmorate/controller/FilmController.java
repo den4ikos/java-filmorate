@@ -12,6 +12,7 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -38,7 +39,7 @@ public class FilmController {
 
     @PutMapping(value = "/films/{filmId}")
     public Film update(@Valid @RequestBody Film film, @PathVariable Long filmId) {
-        final List<Film> filmList = films.stream().filter(f -> Objects.equals(f.getId(), filmId)).toList();
+        final List<Film> filmList = films.stream().filter(f -> Objects.equals(f.getId(), filmId)).collect(Collectors.toList());
         if (filmList.size() == 0) {
             log.error("There is no any film");
             throw new NotFoundException();
