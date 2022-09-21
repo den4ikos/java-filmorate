@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 @RestController
 public class UserController {
     private List<User> users = new ArrayList<>();
+    private static Long id = 0L;
 
     @GetMapping(value = "/users")
     public List<User> findAll(HttpServletRequest request) {
@@ -24,17 +25,19 @@ public class UserController {
         return users;
     }
 
-    @PostMapping(value = "/user")
+    @PostMapping(value = "/users")
     public User create(@Valid @RequestBody User user) {
+        id++;
+        user.setId(id);
         users.add(getNameIfEmpty(user));
         log.info("Endpoint request received: 'POST/user' {}'", user.toString());
         return user;
     }
 
-    @PutMapping(value = "/users/{userId}")
-    public User update(@Valid @RequestBody User user, @PathVariable Long userId) {
+    @PutMapping(value = "/users")
+    public User update(@Valid @RequestBody User user) {
         User checkedUser = getNameIfEmpty(user);
-        final List<User> userById = users.stream().filter(u -> Objects.equals(u.getId(), userId)).collect(Collectors.toList());
+        final List<User> userById = users.stream().filter(u -> Objects.equals(u.getId(), user.getId())).collect(Collectors.toList());
         if (userById.size() == 0) {
             log.error("There is no any user!");
             throw new NotFoundException();
@@ -45,7 +48,7 @@ public class UserController {
         currentUser.setLogin(checkedUser.getLogin());
         currentUser.setName(checkedUser.getName());
         currentUser.setBirthday(checkedUser.getBirthday());
-        log.info("Endpoint request received: 'POST/films/{} {}'", userId, user.toString());
+        log.info("Endpoint request received: 'POST/films/{} {}'", user.getId(), user.toString());
         return checkedUser;
     }
 

@@ -7,7 +7,6 @@ import java.time.LocalDate;
 @Data
 public class Film {
     private Long id;
-
     @NotNull
     @NotBlank(message = "Name is required!")
     private String name;

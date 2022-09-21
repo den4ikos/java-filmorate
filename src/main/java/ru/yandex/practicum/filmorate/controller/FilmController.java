@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 @RestController
 public class FilmController {
     List<Film> films = new ArrayList<>();
+    private static Long id = 0L;
 
     @GetMapping("/films")
     public List<Film> findAll(HttpServletRequest request) {
@@ -26,8 +27,10 @@ public class FilmController {
         return films;
     }
 
-    @PostMapping(value = "/film")
+    @PostMapping(value = "/films")
     public Film create(@Valid @RequestBody Film film) {
+        id++;
+        film.setId(id);
         if ( !(new DateValidation(film.getReleaseDate()).checkDate()) ) {
             log.error("Release date must be greater than 1895-12-28");
             throw new ValidationException("Release date must be greater than 1895-12-28");
@@ -37,9 +40,9 @@ public class FilmController {
         return film;
     }
 
-    @PutMapping(value = "/films/{filmId}")
-    public Film update(@Valid @RequestBody Film film, @PathVariable Long filmId) {
-        final List<Film> filmList = films.stream().filter(f -> Objects.equals(f.getId(), filmId)).collect(Collectors.toList());
+    @PutMapping(value = "/films")
+    public Film update(@Valid @RequestBody Film film) {
+        final List<Film> filmList = films.stream().filter(f -> Objects.equals(f.getId(), film.getId())).collect(Collectors.toList());
         if (filmList.size() == 0) {
             log.error("There is no any film");
             throw new NotFoundException();
@@ -55,7 +58,7 @@ public class FilmController {
         currentFilm.setDescription(film.getDescription());
         currentFilm.setReleaseDate(film.getReleaseDate());
         currentFilm.setDuration(film.getDuration());
-        log.info("Endpoint request received: 'POST/films/{} {}'", filmId, film.toString());
+        log.info("Endpoint request received: 'POST/films/{} {}'", film.getId(), film.toString());
         return film;
     }
 }
