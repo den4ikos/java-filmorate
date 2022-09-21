@@ -35,7 +35,7 @@ public class UserController {
         User checkedUser = getNameIfEmpty(user);
         final List<User> userById = users.stream().filter(u -> Objects.equals(u.getId(), userId)).toList();
         if (userById.size() == 0) {
-            log.info("There is no any user!");
+            log.error("There is no any user!");
             throw new NotFoundException();
         }
 
