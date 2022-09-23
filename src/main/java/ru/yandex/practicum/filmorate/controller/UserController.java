@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @RestController
 public class UserController {
     private List<User> users = new ArrayList<>();
-    private static Long id = 0L;
+    private Long id = 0L;
 
     @GetMapping(value = "/users")
     public List<User> findAll(HttpServletRequest request) {
@@ -38,6 +38,7 @@ public class UserController {
     public User update(@Valid @RequestBody User user) {
         User checkedUser = getNameIfEmpty(user);
         final List<User> userById = users.stream().filter(u -> Objects.equals(u.getId(), user.getId())).collect(Collectors.toList());
+
         if (userById.size() == 0) {
             log.error("There is no any user!");
             throw new NotFoundException();

@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 public class FilmController {
-    List<Film> films = new ArrayList<>();
-    private static Long id = 0L;
+    private List<Film> films = new ArrayList<>();
+    private Long id = 0L;
 
     @GetMapping("/films")
     public List<Film> findAll(HttpServletRequest request) {
@@ -31,7 +31,7 @@ public class FilmController {
     public Film create(@Valid @RequestBody Film film) {
         id++;
         film.setId(id);
-        if ( !(new DateValidation(film.getReleaseDate()).checkDate()) ) {
+        if ( !DateValidation.checkDate(film.getReleaseDate()) ) {
             log.error("Release date must be greater than 1895-12-28");
             throw new ValidationException("Release date must be greater than 1895-12-28");
         }
@@ -42,13 +42,13 @@ public class FilmController {
 
     @PutMapping(value = "/films")
     public Film update(@Valid @RequestBody Film film) {
-        final List<Film> filmList = films.stream().filter(f -> Objects.equals(f.getId(), film.getId())).collect(Collectors.toList());
+        List<Film> filmList = films.stream().filter(f -> Objects.equals(f.getId(), film.getId())).collect(Collectors.toList());
         if (filmList.size() == 0) {
             log.error("There is no any film");
             throw new NotFoundException();
         }
 
-        if ( !(new DateValidation(film.getReleaseDate()).checkDate()) ) {
+        if ( !DateValidation.checkDate(film.getReleaseDate()) ) {
             log.error("Release date must be greater than 1895-12-28");
             throw new ValidationException("Release date must be greater than 1895-12-28");
         }
