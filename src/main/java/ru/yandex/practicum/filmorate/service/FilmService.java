@@ -1,10 +1,13 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.validation.DateValidation;
 
 import java.util.ArrayList;
@@ -13,8 +16,14 @@ import java.util.List;
 @Slf4j
 @Service
 public class FilmService {
+    private FilmStorage filmStorage;
     private List<Film> films = new ArrayList<>();
     private Long id = 0L;
+
+    @Autowired
+    public FilmService(InMemoryFilmStorage filmStorage) {
+        this.filmStorage = filmStorage;
+    }
 
     private void incrementId() {
         id++;

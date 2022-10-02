@@ -1,19 +1,29 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class UserService {
+    private UserStorage userStorage;
     private Long id = 0L;
     private List<User> users = new ArrayList<>();
+
+    @Autowired
+    public UserService(InMemoryUserStorage userStorage) {
+        this.userStorage = userStorage;
+    }
 
     private void incrementId() {
         id++;
@@ -45,6 +55,20 @@ public class UserService {
         currentUser.setBirthday(validUser.getBirthday());
 
         return currentUser;
+    }
+
+    public User getById(Long id) {
+        return users.stream().filter(user -> user.getId().equals(id)).findFirst().orElseThrow(() -> {
+            log.error("There is no any user!");
+            return new NotFoundException();
+        });
+    }
+
+    public void adFriend(Long userId, Long friendId) {
+        User user = getById(userId);
+        User friend = getById(friendId);
+        user.setFriends(friend.getId());
+        friend.setFriends(user.getId());
     }
 
     private User getNameIfEmpty(User user) {
