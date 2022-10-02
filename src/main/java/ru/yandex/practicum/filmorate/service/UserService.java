@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -88,6 +87,23 @@ public class UserService {
         if (friendsIds.size() > 0) {
             for (Long id: friendsIds) {
                 friends.add(getById(id));
+            }
+        }
+
+        return friends;
+    }
+
+    public List<User> getCommonFriends(Long userId, Long otherId) {
+        List<User> friends = new ArrayList<>();
+        User user = getById(userId);
+        User otherUser = getById(otherId);
+        Set<Long> userFriends = user.getFriends();
+
+        if (userFriends.size() > 0) {
+            for (Long id: userFriends) {
+                if (otherUser.getFriends().contains(id)) {
+                    friends.add(getById(id));
+                }
             }
         }
 
