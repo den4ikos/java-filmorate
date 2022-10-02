@@ -15,7 +15,7 @@ public class UserService {
     private Long id = 0L;
     private List<User> users = new ArrayList<>();
 
-    public void incrementId() {
+    private void incrementId() {
         id++;
     }
 
