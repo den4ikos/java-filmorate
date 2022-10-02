@@ -80,6 +80,20 @@ public class UserService {
         friend.getFriends().remove(user.getId());
     }
 
+    public List<User> getFriends(Long userId) {
+        List<User> friends = new ArrayList<>();
+        User user = getById(userId);
+        Set<Long> friendsIds = user.getFriends();
+
+        if (friendsIds.size() > 0) {
+            for (Long id: friendsIds) {
+                friends.add(getById(id));
+            }
+        }
+
+        return friends;
+    }
+
     private User getNameIfEmpty(User user) {
         if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {
             user.setName(user.getLogin());
