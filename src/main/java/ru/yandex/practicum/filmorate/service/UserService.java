@@ -67,8 +67,17 @@ public class UserService {
     public void adFriend(Long userId, Long friendId) {
         User user = getById(userId);
         User friend = getById(friendId);
+
         user.setFriends(friend.getId());
         friend.setFriends(user.getId());
+    }
+
+    public void deleteFriend(Long userId, Long friendId) {
+        User user = getById(userId);
+        User friend = getById(friendId);
+
+        user.getFriends().remove(friend.getId());
+        friend.getFriends().remove(user.getId());
     }
 
     private User getNameIfEmpty(User user) {
