@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.validation.DateValidation;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,20 +19,14 @@ import java.util.stream.Stream;
 @Service
 public class FilmService {
     private FilmStorage filmStorage;
-    private Long id = 0L;
-    private List<Film> films = new ArrayList<>();
 
     @Autowired
     public FilmService(InMemoryFilmStorage filmStorage) {
         this.filmStorage = filmStorage;
     }
 
-    private void incrementId() {
-        id++;
-    }
-
     public List<Film> findAll() {
-        return films;
+        return filmStorage.get();
     }
 
     public Film create(Film film) {
@@ -41,10 +34,8 @@ public class FilmService {
             log.error("Release date must be greater than 1895-12-28");
             throw new ValidationException("Release date must be greater than 1895-12-28");
         }
-        incrementId();
-        film.setId(id);
-        films.add(film);
-        return film;
+
+        return filmStorage.add(film);
     }
 
     public Film update(Film film) {
@@ -52,22 +43,11 @@ public class FilmService {
             log.error("Release date must be greater than 1895-12-28");
             throw new ValidationException("Release date must be greater than 1895-12-28");
         }
-
-        Film currentFilm = films.stream().filter(f -> f.getId().equals(film.getId())).findFirst().orElseThrow(() -> {
-            log.error("There is no any film");
-            return new NotFoundException();
-        });
-
-        currentFilm.setName(film.getName());
-        currentFilm.setDescription(film.getDescription());
-        currentFilm.setReleaseDate(film.getReleaseDate());
-        currentFilm.setDuration(film.getDuration());
-
-        return currentFilm;
+        return filmStorage.update(film);
     }
 
     public Film getById(Long filmId) {
-        return films.stream().filter(film -> film.getId().equals(filmId)).findFirst().orElseThrow(() -> {
+        return filmStorage.get().stream().filter(film -> film.getId().equals(filmId)).findFirst().orElseThrow(() -> {
             log.error("There is no any film!");
             return new NotFoundException();
         });
@@ -90,7 +70,7 @@ public class FilmService {
     }
 
     public List<Film> findByParams(Map<String, String> params) {
-        Stream<Film> results = films.stream();
+        Stream<Film> results = filmStorage.get().stream();
         if (params.containsKey("count")) {
             results = results
                     .sorted((f0, f1) -> f1.getLikes().size() - f0.getLikes().size())
