@@ -4,6 +4,9 @@ import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+
 @Data
 public class Film {
     private Long id;
@@ -23,4 +26,10 @@ public class Film {
     @NotNull
     @Positive(message = "Duration must be positive value!")
     private Integer duration;
+
+    private Set<Long> likes = new HashSet<>();
+
+    public void setLike(Long userId) {
+        likes.add(userId);
+    }
 }

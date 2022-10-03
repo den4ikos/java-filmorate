@@ -11,14 +11,18 @@ import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.validation.DateValidation;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
 public class FilmService {
     private FilmStorage filmStorage;
-    private List<Film> films = new ArrayList<>();
     private Long id = 0L;
+    private List<Film> films = new ArrayList<>();
 
     @Autowired
     public FilmService(InMemoryFilmStorage filmStorage) {
@@ -34,18 +38,18 @@ public class FilmService {
     }
 
     public Film create(Film film) {
-        incrementId();
-        film.setId(id);
-        if ( !DateValidation.checkDate(film.getReleaseDate()) ) {
+        if (!DateValidation.checkDate(film.getReleaseDate())) {
             log.error("Release date must be greater than 1895-12-28");
             throw new ValidationException("Release date must be greater than 1895-12-28");
         }
+        incrementId();
+        film.setId(id);
         films.add(film);
         return film;
     }
 
     public Film update(Film film) {
-        if ( !DateValidation.checkDate(film.getReleaseDate()) ) {
+        if (!DateValidation.checkDate(film.getReleaseDate())) {
             log.error("Release date must be greater than 1895-12-28");
             throw new ValidationException("Release date must be greater than 1895-12-28");
         }
@@ -61,5 +65,40 @@ public class FilmService {
         currentFilm.setDuration(film.getDuration());
 
         return currentFilm;
+    }
+
+    public Film getById(Long filmId) {
+        return films.stream().filter(film -> film.getId().equals(filmId)).findFirst().orElseThrow(() -> {
+            log.error("There is no any film!");
+            return new NotFoundException();
+        });
+    }
+
+    public void addLike(Long filmId, Long userId) {
+        if (userId <= 0) {
+            throw new NotFoundException();
+        }
+        Film film = getById(filmId);
+        film.setLike(userId);
+    }
+
+    public void deleteLike(Long filmId, Long userId) {
+        if (userId <= 0) {
+            throw new NotFoundException();
+        }
+        Film film = getById(filmId);
+        film.getLikes().remove(userId);
+    }
+
+    public List<Film> findByParams(Map<String, String> params) {
+        Stream<Film> results = films.stream();
+        if (params.containsKey("count")) {
+            results = results
+                    .sorted((f0, f1) -> f1.getLikes().size() - f0.getLikes().size())
+                    .limit(Integer.parseInt(params.get("count")));
+        } else {
+            results = results.limit(10);
+        }
+        return results.collect(Collectors.toList());
     }
 }
