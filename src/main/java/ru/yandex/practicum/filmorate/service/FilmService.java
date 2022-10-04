@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.Constants;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -31,8 +32,8 @@ public class FilmService {
 
     public Film create(Film film) {
         if (!DateValidation.checkDate(film.getReleaseDate())) {
-            log.error("Release date must be greater than 1895-12-28");
-            throw new ValidationException("Release date must be greater than 1895-12-28");
+            log.error("Release date must be greater than " + Constants.DATE_BEFORE);
+            throw new ValidationException("Release date must be greater than " + Constants.DATE_BEFORE);
         }
 
         return filmStorage.add(film);
@@ -40,8 +41,8 @@ public class FilmService {
 
     public Film update(Film film) {
         if (!DateValidation.checkDate(film.getReleaseDate())) {
-            log.error("Release date must be greater than 1895-12-28");
-            throw new ValidationException("Release date must be greater than 1895-12-28");
+            log.error("Release date must be greater than " + Constants.DATE_BEFORE);
+            throw new ValidationException("Release date must be greater than " + Constants.DATE_BEFORE);
         }
         return filmStorage.update(film);
     }
@@ -49,13 +50,13 @@ public class FilmService {
     public Film getById(Long filmId) {
         return filmStorage.get().stream().filter(film -> film.getId().equals(filmId)).findFirst().orElseThrow(() -> {
             log.error("There is no any film!");
-            return new NotFoundException();
+            return new NotFoundException("There is no any film!");
         });
     }
 
     public void addLike(Long filmId, Long userId) {
         if (userId <= 0) {
-            throw new NotFoundException();
+            throw new NotFoundException("There is no any user!");
         }
         Film film = getById(filmId);
         film.setLike(userId);
@@ -63,7 +64,7 @@ public class FilmService {
 
     public void deleteLike(Long filmId, Long userId) {
         if (userId <= 0) {
-            throw new NotFoundException();
+            throw new NotFoundException("There is no any user!");
         }
         Film film = getById(filmId);
         film.getLikes().remove(userId);

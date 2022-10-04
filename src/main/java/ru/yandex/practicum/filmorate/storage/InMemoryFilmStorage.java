@@ -33,7 +33,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film update(Film film) {
-        Film currentFilm = films.stream().filter(f -> f.getId().equals(film.getId())).findFirst().orElseThrow(NotFoundException::new);
+        Film currentFilm = films.stream().filter(f -> f.getId().equals(film.getId())).findFirst().orElseThrow(() -> new NotFoundException("There is no any film!"));
 
         currentFilm.setName(film.getName());
         currentFilm.setDescription(film.getDescription());

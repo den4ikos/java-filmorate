@@ -36,7 +36,7 @@ public class InMemoryUserStorage implements UserStorage {
         User currentUser = users.stream()
                 .filter(u -> u.getId().equals(user.getId()))
                 .findFirst()
-                .orElseThrow(NotFoundException::new);
+                .orElseThrow(() -> new NotFoundException("There is no any user!"));
         currentUser.setEmail(validUser.getEmail());
         currentUser.setLogin(validUser.getLogin());
         currentUser.setName(validUser.getName());

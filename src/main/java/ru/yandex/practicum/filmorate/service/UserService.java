@@ -37,7 +37,7 @@ public class UserService {
     public User getById(Long id) {
         return userStorage.get().stream().filter(user -> user.getId().equals(id)).findFirst().orElseThrow(() -> {
             log.error("There is no any user!");
-            return new NotFoundException();
+            return new NotFoundException("There is no any user!");
         });
     }
 
