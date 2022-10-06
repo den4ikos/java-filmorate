@@ -6,37 +6,39 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
     private Long id = 0L;
 
-    private List<User> users = new ArrayList<>();
+    private final Map<Long, User> users = new HashMap<>();
 
     private void incrementId() {
         id++;
     }
 
     @Override
-    public List<User> get() {
+    public Map<Long, User> get() {
         return users;
     }
     @Override
     public User add(User user) {
         incrementId();
         user.setId(id);
-        users.add(getNameIfEmpty(user));
+        users.put(user.getId(), getNameIfEmpty(user));
         return user;
     }
 
     @Override
     public User update(User user) {
+        if (!users.containsKey(user.getId())) {
+            throw new NotFoundException("There is no any user!");
+        }
         User validUser = getNameIfEmpty(user);
-        User currentUser = users.stream()
-                .filter(u -> u.getId().equals(user.getId()))
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException("There is no any user!"));
+        User currentUser = users.get(validUser.getId());
         currentUser.setEmail(validUser.getEmail());
         currentUser.setLogin(validUser.getLogin());
         currentUser.setName(validUser.getName());
@@ -46,7 +48,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void delete(Long userId) {
-
+        users.remove(userId);
     }
 
     private User getNameIfEmpty(User user) {

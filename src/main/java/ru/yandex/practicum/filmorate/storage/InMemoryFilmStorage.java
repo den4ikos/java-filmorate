@@ -6,20 +6,23 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
     private Long id = 0L;
 
-    private List<Film> films = new ArrayList<>();
+    private final Map<Long, Film> films = new HashMap<>();
 
     private void incrementId() {
         id++;
     }
 
     @Override
-    public List<Film> get() {
+    public Map<Long, Film> get() {
         return films;
     }
 
@@ -27,14 +30,17 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film add(Film film) {
         incrementId();
         film.setId(id);
-        films.add(film);
+        films.put(film.getId(), film);
         return film;
     }
 
     @Override
     public Film update(Film film) {
-        Film currentFilm = films.stream().filter(f -> f.getId().equals(film.getId())).findFirst().orElseThrow(() -> new NotFoundException("There is no any film!"));
+        if (!films.containsKey(film.getId())) {
+            throw new NotFoundException("There is no any film!");
+        }
 
+        Film currentFilm = films.get(film.getId());
         currentFilm.setName(film.getName());
         currentFilm.setDescription(film.getDescription());
         currentFilm.setReleaseDate(film.getReleaseDate());
@@ -45,6 +51,9 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public void delete(Long filmId) {
-
+        if (!films.containsKey(filmId)) {
+            throw new NotFoundException("There is no any film!");
+        }
+        films.remove(filmId);
     }
 }

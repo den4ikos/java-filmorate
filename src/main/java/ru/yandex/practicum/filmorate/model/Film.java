@@ -29,7 +29,7 @@ public class Film {
 
     private Set<Long> likes = new HashSet<>();
 
-    public void setLike(Long userId) {
+    public void addLike(Long userId) {
         likes.add(userId);
     }
 }

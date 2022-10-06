@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,20 +11,21 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserService {
-    private UserStorage userStorage;
-
-    @Autowired
-    public UserService(InMemoryUserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
+    private final UserStorage userStorage;
 
     public List<User> findAll() {
-        return userStorage.get();
+        List<User> users = new ArrayList<>();
+        if (userStorage.get().size() > 0) {
+            users.addAll(userStorage.get().values());
+        }
+        return users;
     }
 
     public User create(User user) {
@@ -35,10 +37,10 @@ public class UserService {
     }
 
     public User getById(Long id) {
-        return userStorage.get().stream().filter(user -> user.getId().equals(id)).findFirst().orElseThrow(() -> {
-            log.error("There is no any user!");
-            return new NotFoundException("There is no any user!");
-        });
+        if (!userStorage.get().containsKey(id)) {
+            throw new NotFoundException("There is no any user!");
+        }
+        return userStorage.get().get(id);
     }
 
     public void adFriend(Long userId, Long friendId) {

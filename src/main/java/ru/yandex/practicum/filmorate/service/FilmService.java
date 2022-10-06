@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.validation.DateValidation;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,16 +20,16 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class FilmService {
-    private FilmStorage filmStorage;
-
-    @Autowired
-    public FilmService(InMemoryFilmStorage filmStorage) {
-        this.filmStorage = filmStorage;
-    }
+    private final FilmStorage filmStorage;
 
     public List<Film> findAll() {
-        return filmStorage.get();
+        List<Film> films = new ArrayList<>();
+        if (filmStorage.get().size() > 0) {
+            films.addAll(filmStorage.get().values());
+        }
+        return films;
     }
 
     public Film create(Film film) {
@@ -48,10 +50,10 @@ public class FilmService {
     }
 
     public Film getById(Long filmId) {
-        return filmStorage.get().stream().filter(film -> film.getId().equals(filmId)).findFirst().orElseThrow(() -> {
-            log.error("There is no any film!");
-            return new NotFoundException("There is no any film!");
-        });
+        if (!filmStorage.get().containsKey(filmId)) {
+            throw new NotFoundException("There is no any film!");
+        }
+        return filmStorage.get().get(filmId);
     }
 
     public void addLike(Long filmId, Long userId) {
@@ -59,7 +61,7 @@ public class FilmService {
             throw new NotFoundException("There is no any user!");
         }
         Film film = getById(filmId);
-        film.setLike(userId);
+        film.addLike(userId);
     }
 
     public void deleteLike(Long filmId, Long userId) {
@@ -71,7 +73,7 @@ public class FilmService {
     }
 
     public List<Film> findByParams(Map<String, String> params) {
-        Stream<Film> results = filmStorage.get().stream();
+        Stream<Film> results = filmStorage.get().values().stream();
         if (params.containsKey("count")) {
             results = results
                     .sorted((f0, f1) -> f1.getLikes().size() - f0.getLikes().size())

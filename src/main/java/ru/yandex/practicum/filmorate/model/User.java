@@ -22,7 +22,7 @@ public class User {
 
     private String name;
 
-    @Past
+    @Past(message = "Must contain the past date")
     private LocalDate birthday;
 
     private Set<Long> friends = new HashSet<>();
