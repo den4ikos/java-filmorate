@@ -1,62 +1,66 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 public class UserController {
-    private List<User> users = new ArrayList<>();
-    private Long id = 0L;
-
+    private final UserService userService;
     @GetMapping(value = "/users")
     public List<User> findAll(HttpServletRequest request) {
         log.info("Endpoint request received: '{} {}', Query Parameter String: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return users;
+        return userService.findAll();
+    }
+
+    @GetMapping(value = "/users/{id}")
+    public User getById(@PathVariable Long id) {
+        return userService.getById(id);
     }
 
     @PostMapping(value = "/users")
     public User create(@Valid @RequestBody User user) {
-        id++;
-        user.setId(id);
-        users.add(getNameIfEmpty(user));
         log.info("Endpoint request received: 'POST/user' {}'", user.toString());
-        return user;
+        return userService.create(user);
     }
 
     @PutMapping(value = "/users")
     public User update(@Valid @RequestBody User user) {
-        User checkedUser = getNameIfEmpty(user);
-        final List<User> userById = users.stream().filter(u -> Objects.equals(u.getId(), user.getId())).collect(Collectors.toList());
-
-        if (userById.size() == 0) {
-            log.error("There is no any user!");
-            throw new NotFoundException();
-        }
-
-        final User currentUser = userById.get(0);
-        currentUser.setEmail(checkedUser.getEmail());
-        currentUser.setLogin(checkedUser.getLogin());
-        currentUser.setName(checkedUser.getName());
-        currentUser.setBirthday(checkedUser.getBirthday());
-        log.info("Endpoint request received: 'POST/films/{} {}'", user.getId(), user.toString());
-        return checkedUser;
+        log.info("Endpoint request received: 'PUT/users/{}'", user);
+        return userService.update(user);
     }
 
-    private User getNameIfEmpty(User user) {
-        if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        return user;
+    @PutMapping(value = "/users/{id}/friends/{friendId}")
+    public void addFriendToUser(@PathVariable("id") Long userId, @PathVariable Long friendId) {
+        log.info("Endpoint request received: 'PUT/users/{}/friends/{}'", userId, friendId);
+        userService.adFriend(userId, friendId);
+    }
+
+    @DeleteMapping(value = "/users/{id}/friends/{friendId}")
+    public void deleteFriendFromUser(@PathVariable("id") Long userId, @PathVariable Long friendId) {
+        log.info("Endpoint request received: 'DELETE/users/{}/friends/{}'", userId, friendId);
+        userService.deleteFriend(userId, friendId);
+    }
+
+    @GetMapping(value = "/users/{id}/friends")
+    public List<User> getUserFriends(@PathVariable("id") Long userId) {
+        log.info("Endpoint request received: 'GET/users/{}'", userId);
+        return userService.getFriends(userId);
+    }
+
+    @GetMapping(value = "/users/{id}/friends/common/{otherId}")
+    public List<User> getCommonUserFriends(@PathVariable("id") Long userId, @PathVariable("otherId") Long otherUserId) {
+        log.info("Endpoint request received: 'GET/users/{}/friends/common/{}'", userId, otherUserId);
+        return userService.getCommonFriends(userId, otherUserId);
     }
 }
