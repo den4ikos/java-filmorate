@@ -1,0 +1,16 @@
+server:
+  port: 8080
+logging:
+  level:
+    ru:
+      yandex:
+        practicum: info
+spring:
+  datasource:
+    url: jdbc:h2:file:./db/filmorate
+    username: sa
+    password: password
+    driverClassName: org.h2.Driver
+  sql:
+    init:
+      mode: ALWAYS
