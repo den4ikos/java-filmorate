@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.Constants;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.UserRowMapper;
 import ru.yandex.practicum.filmorate.model.User;
@@ -23,9 +24,8 @@ public class UserDbStorage implements UserStorage {
     }
     @Override
     public Map<Long, User> get() {
-        String query = "select * from users order by name";
         return jdbcTemplate
-                .query(query, new UserRowMapper())
+                .query(Constants.SELECT_USERS, new UserRowMapper())
                 .stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));
     }
@@ -34,20 +34,18 @@ public class UserDbStorage implements UserStorage {
     public User add(User user) {
         User validUser = Validation.checkUserName(user);
         jdbcTemplate.update(
-                "insert into users (name, email, login, birthday) values (?, ?, ?, ?)",
+                Constants.INSERT_USER,
                 validUser.getName(),
                 validUser.getEmail(),
                 validUser.getLogin(),
                 validUser.getBirthday());
-        return jdbcTemplate.queryForObject("select * from users order by id desc limit 1", new UserRowMapper());
+        return jdbcTemplate.queryForObject(Constants.FIND_LAST_USER, new UserRowMapper());
     }
 
     @Override
     public User update(User user) {
-        String sql = "update users set name = ?, email = ?, login = ?, birthday = ? where id = ?";
-
         int numberOfRecords = jdbcTemplate.update(
-                sql,
+                Constants.UPDATE_USER,
                 user.getName(),
                 user.getEmail(),
                 user.getLogin(),
@@ -56,7 +54,7 @@ public class UserDbStorage implements UserStorage {
         );
 
         if (numberOfRecords == 0) {
-            throw new NotFoundException("There is no any user!");
+            throw new NotFoundException(Constants.NO_USER);
         }
 
         return user;
@@ -64,24 +62,22 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User getById(Long id) {
-        String sql = "select * from users where id = ? limit 1";
         try {
-            return jdbcTemplate.queryForObject(sql, new UserRowMapper(), id);
+            return jdbcTemplate.queryForObject(Constants.FIND_USER, new UserRowMapper(), id);
         } catch (EmptyResultDataAccessException exception) {
-            throw new NotFoundException("There is no any user!");
+            throw new NotFoundException(Constants.NO_USER);
         }
     }
 
     @Override
     public void delete(Long userId) {
-        String sql = "delete from users where id = ?";
         int numberOfRecords = jdbcTemplate.update(
-                sql,
+                Constants.DELETE_USER,
                 userId
         );
 
         if (numberOfRecords == 0) {
-            throw new NotFoundException("There is no any user!");
+            throw new NotFoundException(Constants.NO_USER);
         }
     }
 
@@ -89,8 +85,6 @@ public class UserDbStorage implements UserStorage {
     public void addFriends(Long userId, Long friendId) {
         User user = getById(userId);
         User friend = getById(friendId);
-
-        String sql = "insert into friends set user_id = ?, friend_id = ?, friend_status_id = ?";
-        jdbcTemplate.update(sql, user.getId(), friend.getId(), 1);
+        jdbcTemplate.update(Constants.ADD_FRIEND, user.getId(), friend.getId(), 1);
     }
 }
