@@ -9,5 +9,7 @@ public interface UserStorage {
     Map<Long, User> get();
     User add(User user);
     User update(User user);
+    User getById(Long id);
     void delete(Long userId);
+    void addFriends(Long userId, Long friendId);
 }

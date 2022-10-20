@@ -11,7 +11,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.validation.DateValidation;
+import ru.yandex.practicum.filmorate.validation.Validation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ public class FilmService {
     }
 
     public Film create(Film film) {
-        if (!DateValidation.checkDate(film.getReleaseDate())) {
+        if (!Validation.checkDate(film.getReleaseDate())) {
             log.error("Release date must be greater than " + Constants.DATE_BEFORE);
             throw new ValidationException("Release date must be greater than " + Constants.DATE_BEFORE);
         }
@@ -44,7 +44,7 @@ public class FilmService {
     }
 
     public Film update(Film film) {
-        if (!DateValidation.checkDate(film.getReleaseDate())) {
+        if (!Validation.checkDate(film.getReleaseDate())) {
             log.error("Release date must be greater than " + Constants.DATE_BEFORE);
             throw new ValidationException("Release date must be greater than " + Constants.DATE_BEFORE);
         }

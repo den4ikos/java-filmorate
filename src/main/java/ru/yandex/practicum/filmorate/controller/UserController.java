@@ -43,7 +43,7 @@ public class UserController {
     @PutMapping(value = "/users/{id}/friends/{friendId}")
     public void addFriendToUser(@PathVariable("id") Long userId, @PathVariable Long friendId) {
         log.info("Endpoint request received: 'PUT/users/{}/friends/{}'", userId, friendId);
-        userService.adFriend(userId, friendId);
+        userService.addFriend(userId, friendId);
     }
 
     @DeleteMapping(value = "/users/{id}/friends/{friendId}")

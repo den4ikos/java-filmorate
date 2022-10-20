@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.validation.Validation;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +28,7 @@ public class InMemoryUserStorage implements UserStorage {
     public User add(User user) {
         incrementId();
         user.setId(id);
-        users.put(user.getId(), getNameIfEmpty(user));
+        users.put(user.getId(), Validation.checkUserName(user));
         return user;
     }
 
@@ -36,7 +37,7 @@ public class InMemoryUserStorage implements UserStorage {
         if (!users.containsKey(user.getId())) {
             throw new NotFoundException("There is no any user!");
         }
-        User validUser = getNameIfEmpty(user);
+        User validUser = Validation.checkUserName(user);
         User currentUser = users.get(validUser.getId());
         currentUser.setEmail(validUser.getEmail());
         currentUser.setLogin(validUser.getLogin());
@@ -46,14 +47,25 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
+    public User getById(Long id) {
+        if (!get().containsKey(id)) {
+            throw new NotFoundException("There is no any user!");
+        }
+
+        return get().get(id);
+    }
+
+    @Override
     public void delete(Long userId) {
         users.remove(userId);
     }
 
-    private User getNameIfEmpty(User user) {
-        if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        return user;
+    @Override
+    public void addFriends(Long userId, Long friendId) {
+        User user = getById(userId);
+        User friend = getById(friendId);
+
+        user.setFriends(friend.getId());
+        friend.setFriends(user.getId());
     }
 }
