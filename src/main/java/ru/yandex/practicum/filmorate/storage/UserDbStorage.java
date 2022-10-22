@@ -10,6 +10,9 @@ import ru.yandex.practicum.filmorate.mapper.UserRowMapper;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.validation.Validation;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -85,6 +88,34 @@ public class UserDbStorage implements UserStorage {
     public void addFriends(Long userId, Long friendId) {
         User user = getById(userId);
         User friend = getById(friendId);
-        jdbcTemplate.update(Constants.ADD_FRIEND, user.getId(), friend.getId(), 1);
+        jdbcTemplate.update(Constants.ADD_FRIEND, user.getId(), friend.getId());
+        jdbcTemplate.update(Constants.ADD_FRIEND, friend.getId(), user.getId());
+    }
+
+    @Override
+    public List<User> getFriends(Long userId) {
+        return jdbcTemplate.query(Constants.GET_USER_FRIENDS, new UserRowMapper(), userId);
+    }
+
+    @Override
+    public List<User> getCommonFriends(User user, User otherUser) {
+        return jdbcTemplate.query(
+                Constants.GET_COMMON_FRIENDS,
+                new UserRowMapper(),
+                user.getId(),
+                otherUser.getId()
+        );
+    }
+
+    @Override
+    public void deleteFriends(User user, User friend) {
+        Long userId = user.getId();
+        Long friendId = user.getId();
+        jdbcTemplate.update(
+                Constants.DELETE_FRIENDS,
+                userId,
+                friendId,
+                friendId,
+                userId);
     }
 }

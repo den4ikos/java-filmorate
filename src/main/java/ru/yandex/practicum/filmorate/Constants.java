@@ -12,5 +12,8 @@ public class Constants {
     public final static String UPDATE_USER = "update users set name = ?, email = ?, login = ?, birthday = ? where id = ?";
     public final static String FIND_USER = "select * from users where id = ? limit 1";
     public final static String DELETE_USER = "delete from users where id = ?";
-    public final static String ADD_FRIEND = "insert into friends set user_id = ?, friend_id = ?, friend_status_id = ?";
+    public final static String ADD_FRIEND = "insert into friends set user_id = ?, friend_id = ?";
+    public final static String GET_USER_FRIENDS = "select u.*, f.status from users u left join friends f on (u.id = f.friend_id) where f.user_id = ?;";
+    public final static String GET_COMMON_FRIENDS = "select u.* from users u join friends u1 on (u.id = u1.friend_id) join friends u2 on (u1.friend_id = u2.friend_id) where u1.user_id = ? and u2.user_id = ?";
+    public final static String DELETE_FRIENDS = "delete from friends where (user_id = ? and friend_id = ?) or (user_id = ? and friend_id = ?)";
 }

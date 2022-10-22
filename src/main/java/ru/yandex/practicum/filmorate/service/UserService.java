@@ -45,39 +45,16 @@ public class UserService {
     public void deleteFriend(Long userId, Long friendId) {
         User user = getById(userId);
         User friend = getById(friendId);
-
-        user.getFriends().remove(friend.getId());
-        friend.getFriends().remove(user.getId());
+        userStorage.deleteFriends(user, friend);
     }
 
     public List<User> getFriends(Long userId) {
-        List<User> friends = new ArrayList<>();
-        User user = getById(userId);
-        Set<Long> friendsIds = user.getFriends();
-
-        if (friendsIds.size() > 0) {
-            for (Long id: friendsIds) {
-                friends.add(getById(id));
-            }
-        }
-
-        return friends;
+        return userStorage.getFriends(userId);
     }
 
     public List<User> getCommonFriends(Long userId, Long otherId) {
-        List<User> friends = new ArrayList<>();
         User user = getById(userId);
         User otherUser = getById(otherId);
-        Set<Long> userFriends = user.getFriends();
-
-        if (userFriends.size() > 0) {
-            for (Long id: userFriends) {
-                if (otherUser.getFriends().contains(id)) {
-                    friends.add(getById(id));
-                }
-            }
-        }
-
-        return friends;
+        return userStorage.getCommonFriends(user, otherUser);
     }
 }

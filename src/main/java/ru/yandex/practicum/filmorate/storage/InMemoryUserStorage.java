@@ -8,8 +8,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.validation.Validation;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Component("inMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
@@ -68,5 +67,41 @@ public class InMemoryUserStorage implements UserStorage {
 
         user.setFriends(friend.getId());
         friend.setFriends(user.getId());
+    }
+
+    @Override
+    public List<User> getFriends(Long userId) {
+        List<User> friends = new ArrayList<>();
+        User user = getById(userId);
+        Set<Long> friendsIds = user.getFriends();
+
+        if (friendsIds.size() > 0) {
+            for (Long id: friendsIds) {
+                friends.add(getById(id));
+            }
+        }
+
+        return friends;
+    }
+
+    @Override
+    public List<User> getCommonFriends(User user, User otherUser) {
+        List<User> friends = new ArrayList<>();
+        Set<Long> userFriends = user.getFriends();
+        if (userFriends.size() > 0) {
+            for (Long id: userFriends) {
+                if (otherUser.getFriends().contains(id)) {
+                    friends.add(getById(id));
+                }
+            }
+        }
+
+        return friends;
+    }
+
+    @Override
+    public void deleteFriends(User user, User friend) {
+        user.getFriends().remove(friend.getId());
+        friend.getFriends().remove(user.getId());
     }
 }
