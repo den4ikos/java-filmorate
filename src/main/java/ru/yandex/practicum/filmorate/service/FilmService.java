@@ -52,37 +52,26 @@ public class FilmService {
     }
 
     public Film getById(Long filmId) {
-        if (!filmStorage.get().containsKey(filmId)) {
-            throw new NotFoundException("There is no any film!");
-        }
-        return filmStorage.get().get(filmId);
+        return filmStorage.getById(filmId);
     }
 
     public void addLike(Long filmId, Long userId) {
         if (userId <= 0) {
-            throw new NotFoundException("There is no any user!");
+            throw new NotFoundException(Constants.NO_USER);
         }
         Film film = getById(filmId);
-        film.addLike(userId);
+        filmStorage.addLikeToFilm(film, userId);
     }
 
     public void deleteLike(Long filmId, Long userId) {
         if (userId <= 0) {
-            throw new NotFoundException("There is no any user!");
+            throw new NotFoundException(Constants.NO_USER);
         }
         Film film = getById(filmId);
-        film.getLikes().remove(userId);
+        filmStorage.deleteLike(film, userId);
     }
 
     public List<Film> findByParams(Map<String, String> params) {
-        Stream<Film> results = filmStorage.get().values().stream();
-        if (params.containsKey("count")) {
-            results = results
-                    .sorted((f0, f1) -> f1.getLikes().size() - f0.getLikes().size())
-                    .limit(Integer.parseInt(params.get("count")));
-        } else {
-            results = results.limit(10);
-        }
-        return results.collect(Collectors.toList());
+        return filmStorage.find(params);
     }
 }

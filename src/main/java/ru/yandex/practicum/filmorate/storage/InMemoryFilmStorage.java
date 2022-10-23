@@ -7,7 +7,10 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component("inMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
@@ -34,11 +37,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film update(Film film) {
-        if (!films.containsKey(film.getId())) {
-            throw new NotFoundException("There is no any film!");
-        }
-
-        Film currentFilm = films.get(film.getId());
+        Film currentFilm = getById(film.getId());
         currentFilm.setName(film.getName());
         currentFilm.setDescription(film.getDescription());
         currentFilm.setReleaseDate(film.getReleaseDate());
@@ -48,10 +47,42 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+            public Film getById(Long id) {
+        if (!films.containsKey(id)) {
+            throw new NotFoundException("There is no any film!");
+        }
+
+        return films.get(id);
+    }
+
+    @Override
     public void delete(Long filmId) {
         if (!films.containsKey(filmId)) {
             throw new NotFoundException("There is no any film!");
         }
         films.remove(filmId);
+    }
+
+    @Override
+    public List<Film> find(Map<String, String> params) {
+        Stream<Film> results = get().values().stream();
+        if (params.containsKey("count")) {
+            results = results
+                    .sorted((f0, f1) -> f1.getLikes().size() - f0.getLikes().size())
+                    .limit(Integer.parseInt(params.get("count")));
+        } else {
+            results = results.limit(10);
+        }
+        return results.collect(Collectors.toList());
+    }
+
+    @Override
+    public void addLikeToFilm(Film film, Long userId) {
+        film.addLike(userId);
+    }
+
+    @Override
+    public void deleteLike(Film film, Long userId) {
+        film.getLikes().remove(userId);
     }
 }
