@@ -65,11 +65,10 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User getById(Long id) {
-        try {
-            return jdbcTemplate.queryForObject(Constants.FIND_USER, new UserRowMapper(), id);
-        } catch (EmptyResultDataAccessException exception) {
-            throw new NotFoundException(Constants.NO_USER);
-        }
+        return jdbcTemplate.query(Constants.FIND_USER, new UserRowMapper(), id)
+                .stream()
+                .findAny()
+                .orElseThrow(() -> new NotFoundException(Constants.NO_USER));
     }
 
     @Override

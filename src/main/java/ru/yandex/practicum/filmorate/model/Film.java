@@ -20,6 +20,10 @@ public class Film {
     private String description;
 
     @NotNull
+    @NotBlank
+    private String genre;
+
+    @NotNull
     @Past
     private LocalDate releaseDate;
 
