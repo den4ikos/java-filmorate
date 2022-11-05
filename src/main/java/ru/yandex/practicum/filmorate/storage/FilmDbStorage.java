@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.Constants;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.mapper.FilmRowMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
@@ -35,10 +36,12 @@ public class FilmDbStorage implements FilmStorage {
                 film.getName(),
                 film.getDescription(),
                 film.getReleaseDate(),
-                film.getDuration()
+                film.getDuration(),
+                film.getRate(),
+                film.getMpa().get("id")
         );
 
-        return jdbcTemplate.queryForObject(Constants.GET_FILM, new BeanPropertyRowMapper<>(Film.class));
+        return jdbcTemplate.queryForObject(Constants.GET_FILM, new FilmRowMapper());
     }
 
     @Override

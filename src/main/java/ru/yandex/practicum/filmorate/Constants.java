@@ -18,7 +18,7 @@ public class Constants {
     public final static String GET_COMMON_FRIENDS = "SELECT u.* FROM users u JOIN friends u1 ON (u.id = u1.friend_id) JOIN friends u2 ON (u1.friend_id = u2.friend_id) WHERE u1.user_id = ? and u2.user_id = ?";
     public final static String DELETE_FRIENDS = "DELETE FROM friends WHERE user_id = ? and friend_id = ?";
     public final static String GET_ALL_FILMS = "SELECT * FROM films ORDER BY id";
-    public final static String ADD_FILM = "INSERT INTO films (name, description, releaseDate, duration) VALUES(?, ?, ?, ?)";
+    public final static String ADD_FILM = "INSERT INTO films (name, description, releaseDate, duration, rate, mpa_id) VALUES(?, ?, ?, ?, ?, ?)";
     public final static String GET_FILM = "SELECT * FROM films ORDER BY id DESC LIMIT 1";
     public final static String GET_FILM_BY_ID = "SELECT * FROM films WHERE id = ? LIMIT 1";
     public final static String ADD_LIKE = "INSERT INTO likes (user_id, film_id) VALUES (?, ?)";
