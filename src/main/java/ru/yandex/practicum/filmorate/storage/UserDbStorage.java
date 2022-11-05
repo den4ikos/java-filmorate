@@ -87,7 +87,7 @@ public class UserDbStorage implements UserStorage {
         User user = getById(userId);
         User friend = getById(friendId);
         jdbcTemplate.update(Constants.ADD_FRIEND, user.getId(), friend.getId());
-        jdbcTemplate.update(Constants.ADD_FRIEND, friend.getId(), user.getId());
+//        jdbcTemplate.update(Constants.ADD_FRIEND, friend.getId(), user.getId());
     }
 
     @Override
@@ -108,12 +108,10 @@ public class UserDbStorage implements UserStorage {
     @Override
     public void deleteFriends(User user, User friend) {
         Long userId = user.getId();
-        Long friendId = user.getId();
+        Long friendId = friend.getId();
         jdbcTemplate.update(
                 Constants.DELETE_FRIENDS,
                 userId,
-                friendId,
-                friendId,
-                userId);
+                friendId);
     }
 }
