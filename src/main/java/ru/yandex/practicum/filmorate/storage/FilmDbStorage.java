@@ -48,11 +48,13 @@ public class FilmDbStorage implements FilmStorage {
     public Film update(Film film) {
         Film filmFromDb = getById(film.getId());
         jdbcTemplate.update(
-                "update films set name = ?, description = ?, releaseDate = ?, duration = ? where id = ?",
+                "update films set name = ?, description = ?, releaseDate = ?, duration = ?, rate = ?, mpa_id = ? where id = ?",
                 film.getName(),
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
+                film.getRate(),
+                film.getMpa().get("id"),
                 filmFromDb.getId()
         );
 
