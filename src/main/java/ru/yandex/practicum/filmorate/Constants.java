@@ -6,9 +6,8 @@ public class Constants {
     public static final String NO_USER = "There is no any user!";
     public static final String NO_FILM = "There is no any film!";
     public static final String NO_MPA = "There is no any MPA!";
-
+    public static final String NO_GENRE = "There is no any genre!";
     public static final String CONFIRMED_FRIEND = "confirmed";
-
     public static final String UNCONFIRMED_FRIEND = "unconfirmed";
     public final static String SELECT_USERS = "SELECT * FROM users ORDER BY name";
     public final static String INSERT_USER = "INSERT INTO users (name, email, login, birthday) VALUES (?, ?, ?, ?)";
@@ -26,4 +25,6 @@ public class Constants {
     public final static String GET_FILM_BY_ID = "SELECT f.*, mpa.name AS mpa_name FROM films f LEFT JOIN motion_picture_associations mpa ON (f.mpa_id = mpa.id) WHERE f.id = ? LIMIT 1";
     public final static String ADD_LIKE = "INSERT INTO likes (user_id, film_id) VALUES (?, ?)";
     public final static String REMOVE_LIKE = "DELETE FROM likes WHERE user_id = ? AND film_id = ?";
+    public final static String GET_GENRE_BY_ID = "SELECT * FROM genres WHERE id = ?";
+    public final static String GET_ALL_GENRE = "SELECT * FROM genres ORDER BY id";
 }
