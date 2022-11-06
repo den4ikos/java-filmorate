@@ -71,7 +71,7 @@ public class FilmService {
         filmStorage.deleteLike(film, userId);
     }
 
-    public List<Film> findByParams(Map<String, String> params) {
+public List<Film> findByParams(Map<String, String> params) {
         return filmStorage.find(params);
     }
 }

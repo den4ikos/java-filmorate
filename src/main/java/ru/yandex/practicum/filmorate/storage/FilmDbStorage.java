@@ -133,7 +133,7 @@ public class FilmDbStorage implements FilmStorage {
             sql.append(selectMpa);
             sql.append(" LIMIT ?");
         }
-        System.out.println(sql);
+
         return jdbcTemplate.query(sql.toString(), new FilmRowMapper(), count);
     }
 

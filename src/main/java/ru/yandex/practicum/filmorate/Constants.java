@@ -5,7 +5,10 @@ public class Constants {
     public static final String FORMAT = "yyyy-MM-dd";
     public static final String NO_USER = "There is no any user!";
     public static final String NO_FILM = "There is no any film!";
+    public static final String NO_MPA = "There is no any MPA!";
+
     public static final String CONFIRMED_FRIEND = "confirmed";
+
     public static final String UNCONFIRMED_FRIEND = "unconfirmed";
     public final static String SELECT_USERS = "SELECT * FROM users ORDER BY name";
     public final static String INSERT_USER = "INSERT INTO users (name, email, login, birthday) VALUES (?, ?, ?, ?)";
