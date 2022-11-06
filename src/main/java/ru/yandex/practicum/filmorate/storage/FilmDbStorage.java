@@ -121,15 +121,20 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> find(Map<String, String> params) {
-        StringBuilder sql = new StringBuilder("SELECT films.*");
+        StringBuilder sql = new StringBuilder("SELECT films.*, mpa.name as mpa_name ");
+        String selectMpa = " LEFT JOIN motion_picture_associations mpa ON (films.mpa_id = mpa.id) ";
         int count = params.containsKey("count") ? Integer.parseInt(params.get("count")) : 10;
         if (params.containsKey("count")) {
-            sql.append(", COUNT(likes.*) AS total FROM films LEFT JOIN likes ON (films.id = likes.film_id) GROUP BY films.id ORDER BY total DESC LIMIT ?");
+            sql.append(", (SELECT COUNT(*) FROM likes WHERE likes.film_id = films.id) AS total FROM films");
+            sql.append(selectMpa);
+            sql.append("GROUP BY films.id ORDER BY total DESC LIMIT ?");
         } else {
-            sql.append(" FROM films LIMIT ?");
+            sql.append(" FROM films");
+            sql.append(selectMpa);
+            sql.append(" LIMIT ?");
         }
-
-        return jdbcTemplate.query(sql.toString(), new BeanPropertyRowMapper<>(Film.class), count);
+        System.out.println(sql);
+        return jdbcTemplate.query(sql.toString(), new FilmRowMapper(), count);
     }
 
     @Override
