@@ -11,8 +11,8 @@ import ru.yandex.practicum.filmorate.mapper.FilmRowMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
-import java.util.List;
-import java.util.Map;
+import java.sql.ResultSet;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -41,7 +41,33 @@ public class FilmDbStorage implements FilmStorage {
                 film.getMpa().get("id")
         );
 
-        return jdbcTemplate.queryForObject(Constants.GET_FILM, new FilmRowMapper());
+        Film createdFilm = jdbcTemplate.queryForObject(Constants.GET_FILM, new FilmRowMapper());
+
+        if (!film.getGenres().isEmpty()) {
+            StringBuilder sql = new StringBuilder("INSERT INTO film_genre (film_id, genre_id) VALUES ");
+
+            int j = 1;
+            String delimiter = ", ";
+            List<Map<String, Object>> genres = new ArrayList<>();
+
+            for (Map<String, Object> f : film.getGenres()) {
+                Map<String, Object> g = new HashMap<>();
+                g.put("id", f.get("id"));
+                genres.add(g);
+                if (film.getGenres().size() == j) {
+                    delimiter = ";";
+                }
+                sql.append("("+ createdFilm.getId() +", "+ f.get("id") +")" + delimiter);
+
+                j++;
+            }
+
+            jdbcTemplate.update(sql.toString());
+
+            createdFilm.setGenres(genres);
+        }
+
+        return createdFilm;
     }
 
     @Override
@@ -63,10 +89,29 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getById(Long id) {
-        return jdbcTemplate.query(Constants.GET_FILM_BY_ID, new BeanPropertyRowMapper<>(Film.class), id)
+        Film film = jdbcTemplate.query(Constants.GET_FILM_BY_ID, new FilmRowMapper(), id)
                 .stream()
                 .findAny()
                 .orElseThrow(() -> new NotFoundException(Constants.NO_FILM));
+
+        Map<String, Object> ids = jdbcTemplate.query(
+                "SELECT fg.genre_id AS id, g.name FROM film_genre fg LEFT JOIN genres g ON (fg.genre_id = g.id) WHERE film_id = ?",
+                (ResultSet rs) -> {
+                    Map<String, Object> results = new HashMap<>();
+                    while (rs.next()) {
+                        results.put("id", rs.getInt("id"));
+                        results.put("name", rs.getString("name"));
+                    }
+
+                    return results;
+                },
+                id);
+
+        if (ids != null && !ids.isEmpty()) {
+            film.getGenres().add(ids);
+        }
+
+        return film;
     }
 
     @Override

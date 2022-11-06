@@ -17,10 +17,10 @@ public class Constants {
     public final static String GET_USER_FRIENDS = "SELECT u.*, f.status FROM users u LEFT JOIN friends f ON (u.id = f.friend_id) WHERE f.user_id = ?;";
     public final static String GET_COMMON_FRIENDS = "SELECT u.* FROM users u JOIN friends u1 ON (u.id = u1.friend_id) JOIN friends u2 ON (u1.friend_id = u2.friend_id) WHERE u1.user_id = ? and u2.user_id = ?";
     public final static String DELETE_FRIENDS = "DELETE FROM friends WHERE user_id = ? and friend_id = ?";
-    public final static String GET_ALL_FILMS = "SELECT * FROM films ORDER BY id";
+    public final static String GET_ALL_FILMS = "SELECT f.*, mpa.name as mpa_name FROM films f LEFT JOIN motion_picture_associations mpa ON (f.mpa_id = mpa.id) ORDER BY f.id";
     public final static String ADD_FILM = "INSERT INTO films (name, description, releaseDate, duration, rate, mpa_id) VALUES(?, ?, ?, ?, ?, ?)";
-    public final static String GET_FILM = "SELECT * FROM films ORDER BY id DESC LIMIT 1";
-    public final static String GET_FILM_BY_ID = "SELECT * FROM films WHERE id = ? LIMIT 1";
+    public final static String GET_FILM = "SELECT f.*, mpa.name as mpa_name FROM films f LEFT JOIN motion_picture_associations mpa ON (f.mpa_id = mpa.id) ORDER BY f.id DESC LIMIT 1";
+    public final static String GET_FILM_BY_ID = "SELECT f.*, mpa.name AS mpa_name FROM films f LEFT JOIN motion_picture_associations mpa ON (f.mpa_id = mpa.id) WHERE f.id = ? LIMIT 1";
     public final static String ADD_LIKE = "INSERT INTO likes (user_id, film_id) VALUES (?, ?)";
     public final static String REMOVE_LIKE = "DELETE FROM likes WHERE user_id = ? AND film_id = ?";
 }

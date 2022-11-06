@@ -4,10 +4,7 @@ import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Data
 public class Film {
@@ -32,9 +29,11 @@ public class Film {
     private Integer rate;
 
     @NotNull(message = "MPA is required")
-    private Map<String, Integer> mpa = new HashMap<>();
-    private Set<Long> likes = new HashSet<>();
+    private Map<String, Object> mpa = new LinkedHashMap<>();
 
+    private List<Map<String, Object>> genres = new ArrayList<>();
+
+    private Set<Long> likes = new HashSet<>();
 
     public void addLike(Long userId) {
         likes.add(userId);
