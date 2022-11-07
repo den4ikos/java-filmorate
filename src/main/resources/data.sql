@@ -2,7 +2,7 @@ delete from genres;
 insert into genres (id, name) values
 (1, 'Комедия'),
 (2, 'Драма'),
-(3, 'Action'),
+(3, 'Мультфильм'),
 (4, 'fantasy'),
 (5, 'horror'),
 (6, 'mystery');

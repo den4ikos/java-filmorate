@@ -24,9 +24,17 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Map<Long, Film> get() {
-        return jdbcTemplate.query(Constants.GET_ALL_FILMS, new BeanPropertyRowMapper<>(Film.class))
+        Map<Long, Film> films = jdbcTemplate.query(Constants.GET_ALL_FILMS, new FilmRowMapper())
                 .stream()
                 .collect(Collectors.toMap(Film::getId, Function.identity()));
+
+        if (!films.isEmpty()) {
+            for(Film f: films.values()) {
+                setFilmGenre(f);
+            }
+        }
+
+        return films;
     }
 
     @Override
@@ -43,28 +51,9 @@ public class FilmDbStorage implements FilmStorage {
 
         Film createdFilm = jdbcTemplate.queryForObject(Constants.GET_FILM, new FilmRowMapper());
 
-        if (!film.getGenres().isEmpty()) {
-            StringBuilder sql = new StringBuilder("INSERT INTO film_genre (film_id, genre_id) VALUES ");
-
-            int j = 1;
-            String delimiter = ", ";
-            List<Map<String, Object>> genres = new ArrayList<>();
-
-            for (Map<String, Object> f : film.getGenres()) {
-                Map<String, Object> g = new HashMap<>();
-                g.put("id", f.get("id"));
-                genres.add(g);
-                if (film.getGenres().size() == j) {
-                    delimiter = ";";
-                }
-                sql.append("("+ createdFilm.getId() +", "+ f.get("id") +")" + delimiter);
-
-                j++;
-            }
-
-            jdbcTemplate.update(sql.toString());
-
-            createdFilm.setGenres(genres);
+        if (genreIsNotEmpty(film)) {
+            film.setId(createdFilm.getId());
+            createdFilm.setGenres(saveFilmGenre(film));
         }
 
         return createdFilm;
@@ -84,6 +73,8 @@ public class FilmDbStorage implements FilmStorage {
                 filmFromDb.getId()
         );
 
+        updateFilmGenre(film);
+        sortGenres(film);
         return film;
     }
 
@@ -94,22 +85,7 @@ public class FilmDbStorage implements FilmStorage {
                 .findAny()
                 .orElseThrow(() -> new NotFoundException(Constants.NO_FILM));
 
-        Map<String, Object> ids = jdbcTemplate.query(
-                "SELECT fg.genre_id AS id, g.name FROM film_genre fg LEFT JOIN genres g ON (fg.genre_id = g.id) WHERE film_id = ?",
-                (ResultSet rs) -> {
-                    Map<String, Object> results = new HashMap<>();
-                    while (rs.next()) {
-                        results.put("id", rs.getInt("id"));
-                        results.put("name", rs.getString("name"));
-                    }
-
-                    return results;
-                },
-                id);
-
-        if (ids != null && !ids.isEmpty()) {
-            film.getGenres().add(ids);
-        }
+        setFilmGenre(film);
 
         return film;
     }
@@ -145,5 +121,87 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void deleteLike(Film film, Long userId) {
         jdbcTemplate.update(Constants.REMOVE_LIKE, userId, film.getId());
+    }
+
+    private boolean genreIsNotEmpty(Film film) {
+        return !film.getGenres().isEmpty();
+    }
+
+    private void updateFilmGenre(Film film) {
+        int j = 1;
+        String delimiter = ",";
+        StringBuilder updateGenreSql = new StringBuilder(
+                "DELETE FROM film_genre WHERE film_id = ?; "
+        );
+        if (genreIsNotEmpty(film)) {
+            updateGenreSql.append("INSERT INTO film_genre (film_id, genre_id) VALUES ");
+            for(Map<String, Object> g: film.getGenres()) {
+                if (film.getGenres().size() == j) {
+                    delimiter = ";";
+                }
+                updateGenreSql.append("(");
+                updateGenreSql.append(film.getId());
+                updateGenreSql.append(", ");
+                updateGenreSql.append(g.get("id"));
+                updateGenreSql.append(")");
+
+                updateGenreSql.append(delimiter);
+                j++;
+            }
+        }
+
+        jdbcTemplate.update(
+                updateGenreSql.toString(),
+                film.getId()
+        );
+    }
+
+    private Set<Map<String, Object>> saveFilmGenre(Film film) {
+        StringBuilder sql = new StringBuilder("INSERT INTO film_genre (film_id, genre_id) VALUES ");
+
+        int j = 1;
+        String delimiter = ", ";
+        Set<Map<String, Object>> genres = new LinkedHashSet<>();
+
+        for (Map<String, Object> f : film.getGenres()) {
+            Map<String, Object> g = new HashMap<>();
+            g.put("id", f.get("id"));
+            genres.add(g);
+            if (film.getGenres().size() == j) {
+                delimiter = ";";
+            }
+            sql.append("("+ film.getId() +", "+ f.get("id") +")" + delimiter);
+
+            j++;
+        }
+
+        jdbcTemplate.update(sql.toString());
+
+        return genres;
+    }
+
+    private void setFilmGenre(Film film) {
+        Set<Map<String, Object>> genres = new LinkedHashSet<>();
+        jdbcTemplate.query(
+                "SELECT fg.genre_id AS id, g.name FROM film_genre fg LEFT JOIN genres g ON (fg.genre_id = g.id) WHERE film_id = ? ORDER BY g.id ASC",
+                (ResultSet rs) -> {
+                    do {
+                        Map<String, Object> results = new HashMap<>();
+                        results.put("id", rs.getInt("id"));
+                        results.put("name", rs.getString("name"));
+                        genres.add(results);
+                    } while (rs.next());
+                },
+                film.getId());
+        film.setGenres(genres);
+    }
+
+    private void sortGenres(Film film) {
+        film.setGenres(
+                film.getGenres()
+                        .stream()
+                        .sorted(Comparator.comparingInt(g -> (int) g.get("id")))
+                        .collect(Collectors.toCollection(LinkedHashSet::new))
+        );
     }
 }

@@ -31,7 +31,7 @@ public class Film {
     @NotNull(message = "MPA is required")
     private Map<String, Object> mpa = new LinkedHashMap<>();
 
-    private List<Map<String, Object>> genres = new ArrayList<>();
+    private Set<Map<String, Object>> genres = new LinkedHashSet<>();
 
     private Set<Long> likes = new HashSet<>();
 
