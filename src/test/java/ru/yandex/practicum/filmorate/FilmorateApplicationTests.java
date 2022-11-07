@@ -1,121 +1,84 @@
 package ru.yandex.practicum.filmorate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeEach;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.UserDbStorage;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.*;
 
-@SpringBootTest()
-@AutoConfigureMockMvc
+import java.time.LocalDate;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+@SpringBootTest
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmorateApplicationTests {
-    @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final UserDbStorage userStorage;
+    private final FilmDbStorage filmDbStorage;
 
-    String validFilm;
-    String inValidFilm;
-    String validUser;
-    String inValidUser;
-
-    @BeforeEach
-    public void beforeEach() {
-        validFilm = "{\"id\":null,\"name\":\"Film Name\",\"description\":\"Film description\",\"releaseDate\":\"2015-03-01\",\"duration\":100}";
-        validUser = "{\"id\":null,\"email\":\"test@yandex.ru\",\"login\":\"TestLogin\",\"name\":\"Test Name\",\"birthday\":\"1990-03-01\"}";
+    @Test
+    public void getEmptyUsers() {
+        Map<Long, User> users = userStorage.get();
+        assertThat(users.isEmpty()).isEqualTo(true);
     }
 
-    @SneakyThrows
     @Test
-    void contextLoads() {
-        mockMvc.perform(get("/films")
-                .contentType(MediaType.APPLICATION_JSON)).andDo(h->
-                System.out.println(h.getResponse())
-        );
-
-        mockMvc.perform(get("/users")
-                .contentType(MediaType.APPLICATION_JSON)).andDo(h->
-                System.out.println(h.getResponse())
-        );
-
+    public void getUnknownUserAndThrownNotFoundException() {
+        assertThatThrownBy(
+                () -> userStorage.getById(11111L)
+        )
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage(Constants.NO_USER);
     }
 
-    @SneakyThrows
     @Test
-    public void createFilmWithEmptyTitleAndReturn400Status() {
-        inValidFilm = "{\"id\":null,\"name\":\"\",\"description\":\"Film description\",\"releaseDate\":\"2015-03-01\",\"duration\":100}";
-        mockMvc.perform(post("/films").contentType(MediaType.APPLICATION_JSON).content(inValidFilm))
-                .andExpect(status().is4xxClientError())
-                .andDo(h -> System.out.println(h.getResponse()));
+    public void createAndReturnUser() {
+        User newUser = new User();
+        newUser.setName("Test Name");
+        newUser.setBirthday(LocalDate.parse("1989-12-09"));
+        newUser.setEmail("test@test.com");
+        newUser.setLogin("TestUser");
+
+        User createdUser = userStorage.add(newUser);
+        assertThat(createdUser.getId()).isEqualTo(1);
     }
 
-    @SneakyThrows
     @Test
-    public void createFilmWithFailDescriptionAndReturn400Status() {
-        inValidFilm = "{\"id\":null,\"name\":\"Test name\",\"description\":\"Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis\",\"releaseDate\":\"2015-03-01\",\"duration\":100}";
-        mockMvc.perform(post("/films").contentType(MediaType.APPLICATION_JSON).content(inValidFilm))
-                .andExpect(status().is4xxClientError())
-                .andDo(h -> System.out.println(h.getResponse()));
+    public void getEmptyFilms() {
+        Map<Long, Film> films = filmDbStorage.get();
+        assertThat(films.isEmpty()).isEqualTo(true);
     }
 
-    @SneakyThrows
     @Test
-    public void createFilmWithFailDurationAndReturnBadRequest() {
-        inValidFilm = "{\"id\":null,\"name\":\"Test name\",\"description\":\"Lorem ipsum dolor sit amet\",\"releaseDate\":\"2015-03-01\",\"duration\":-1}";
-        mockMvc.perform(post("/films").contentType(MediaType.APPLICATION_JSON).content(inValidFilm))
-                .andExpect(status().isBadRequest())
-                .andDo(h -> System.out.println(h.getResponse()));
+    public void getUnknownFilmAndThrownNotFoundException() {
+        assertThatThrownBy(
+                () -> filmDbStorage.getById(1111L)
+        )
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage(Constants.NO_FILM);
     }
 
-    @SneakyThrows
     @Test
-    public void updateFilmWithFailIdAndReturn400Status() {
-        mockMvc.perform(put("/films").contentType(MediaType.APPLICATION_JSON).content(validFilm))
-                .andExpect(status().is4xxClientError())
-                .andDo(h -> System.out.println(h.getResponse()));
-    }
+    public void createAndReturnFilm() {
+        Map<String, Object> mpa = new LinkedHashMap<>();
+        mpa.put("id", 1);
+        Film film = new Film();
+        film.setName("Test Film");
+        film.setDescription("Test description");
+        film.setReleaseDate(LocalDate.parse("1989-08-05"));
+        film.setDuration(120);
+        film.setRate(4);
+        film.setMpa(mpa);
 
-    @SneakyThrows
-    @Test
-    public void createUserWithFailLoginAndReturnBadRequest() {
-        inValidUser = "{\"id\":null,\"email\":\"test@yandex.ru\",\"login\":\" \",\"name\":\"Test Name\",\"birthday\":\"1990-03-01\"}";;
-        mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON).content(inValidUser))
-                .andExpect(status().isBadRequest())
-                .andDo(h -> System.out.println(h.getResponse()));
-    }
-
-    @SneakyThrows
-    @Test
-    public void createUserWithFailEmailAndReturnBadRequest() {
-        inValidUser = "{\"id\":null,\"email\":\"testyandex.ru\",\"login\":\"TestLogin\",\"name\":\"Test Name\",\"birthday\":\"1990-03-01\"}";;
-        mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON).content(inValidUser))
-                .andExpect(status().isBadRequest())
-                .andDo(h -> System.out.println(h.getResponse()));
-    }
-
-    @SneakyThrows
-    @Test
-    public void createUserWithFailBirthdayAndReturnBadRequest() {
-        inValidUser = "{\"id\":null,\"email\":\"test@yandex.ru\",\"login\":\"TestLogin\",\"name\":\"Test Name\",\"birthday\":\"2028-03-01\"}";;
-        mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON).content(inValidUser))
-                .andExpect(status().isBadRequest())
-                .andDo(h -> System.out.println(h.getResponse()));
-    }
-
-    @SneakyThrows
-    @Test
-    public void updateUserWithFailIdAndReturnBadRequest() {
-        mockMvc.perform(put("/users").contentType(MediaType.APPLICATION_JSON).content(validUser))
-                .andExpect(status().is4xxClientError())
-                .andDo(h -> System.out.println(h.getResponse()));
+        Film createdFilm = filmDbStorage.add(film);
+        assertThat(createdFilm.getId()).isEqualTo(1);
     }
 }

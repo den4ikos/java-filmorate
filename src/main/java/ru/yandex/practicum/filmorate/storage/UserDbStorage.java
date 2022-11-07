@@ -25,7 +25,7 @@ public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Map<Long, User> get() {
+public Map<Long, User> get() {
         return jdbcTemplate
                 .query(Constants.SELECT_USERS, new UserRowMapper())
                 .stream()
