@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Slf4j
 @Service
-@Qualifier("dbGenreStorage")
+@Qualifier("genreDbStorage")
 @RequiredArgsConstructor
 public class GenreService {
     private final GenreStorage genreStorage;
@@ -24,7 +24,7 @@ public class GenreService {
 
     public List<Genre> getAll() {
         List<Genre> genres = new ArrayList<>();
-        Map<Long, Genre> genresFromQuery = genreStorage.get();
+        Map<Long, Genre> genresFromQuery = genreStorage.getAll();
 
         if (!genresFromQuery.isEmpty()) {
             genres.addAll(genresFromQuery.values());

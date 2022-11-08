@@ -7,5 +7,5 @@ import java.util.Map;
 
 public interface MpaStorage {
     Mpa getById(Long id);
-    Map<Long, Mpa> get();
+    List<Mpa> getAll();
 }

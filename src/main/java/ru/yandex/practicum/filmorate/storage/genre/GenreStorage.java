@@ -6,5 +6,5 @@ import java.util.Map;
 
 public interface GenreStorage {
     Genre getById(Long id);
-    Map<Long, Genre> get();
+    Map<Long, Genre> getAll();
 }

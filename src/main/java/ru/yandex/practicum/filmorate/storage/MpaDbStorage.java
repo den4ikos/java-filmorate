@@ -10,11 +10,13 @@ import ru.yandex.practicum.filmorate.mapper.MpaRowMapper;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Component("mpaDbStorage")
+@Component
 @Primary
 @AllArgsConstructor
 public class MpaDbStorage implements MpaStorage {
@@ -29,9 +31,7 @@ public class MpaDbStorage implements MpaStorage {
     }
 
     @Override
-    public Map<Long, Mpa> get() {
-        return jdbcTemplate.query("SELECT * FROM motion_picture_associations ORDER BY id", new MpaRowMapper())
-                .stream()
-                .collect(Collectors.toMap(Mpa::getId, Function.identity()));
+    public List<Mpa> getAll() {
+        return new ArrayList<>(jdbcTemplate.query("SELECT * FROM motion_picture_associations ORDER BY id", new MpaRowMapper()));
     }
 }

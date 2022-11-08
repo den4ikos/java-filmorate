@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.Constants;
@@ -10,18 +9,15 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.validation.Validation;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
-@Qualifier("dbFilmStorage")
+@Qualifier("filmDbStorage")
 @RequiredArgsConstructor
 public class FilmService {
     private final FilmStorage filmStorage;
@@ -72,6 +68,6 @@ public class FilmService {
     }
 
 public List<Film> findByParams(Map<String, String> params) {
-        return filmStorage.find(params);
+        return filmStorage.findAllByParams(params);
     }
 }

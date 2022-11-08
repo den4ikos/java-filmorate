@@ -13,7 +13,6 @@ import java.util.Set;
 
 @Slf4j
 @Service
-@Qualifier("dbUserStorage")
 @RequiredArgsConstructor
 public class UserService {
     private final UserStorage userStorage;

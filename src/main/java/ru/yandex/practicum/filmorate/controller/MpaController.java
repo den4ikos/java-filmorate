@@ -25,6 +25,6 @@ public class MpaController {
     @GetMapping("/mpa")
     public List<Mpa> getAll() {
         log.info("Endpoint request received: 'GET /mpa");
-        return mpaService.get();
+        return mpaService.getAll();
     }
 }

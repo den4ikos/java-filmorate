@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Component("dbGenreStorage")
+@Component
 @Primary
 @AllArgsConstructor
 public class GenreDbStorage implements GenreStorage {
@@ -29,7 +29,7 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public Map<Long, Genre> get() {
+    public Map<Long, Genre> getAll() {
         return jdbcTemplate.query(Constants.GET_ALL_GENRE, new GenreMapper())
                 .stream()
                 .collect(Collectors.toMap(Genre::getId, Function.identity()));

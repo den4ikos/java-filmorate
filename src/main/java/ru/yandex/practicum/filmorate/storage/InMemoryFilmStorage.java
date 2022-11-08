@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Component("inMemoryFilmStorage")
+@Component
 public class InMemoryFilmStorage implements FilmStorage {
     private Long id = 0L;
 
@@ -47,7 +47,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-            public Film getById(Long id) {
+    public Film getById(Long id) {
         if (!films.containsKey(id)) {
             throw new NotFoundException("There is no any film!");
         }
@@ -64,7 +64,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> find(Map<String, String> params) {
+    public List<Film> findAllByParams(Map<String, String> params) {
         Stream<Film> results = get().values().stream();
         if (params.containsKey("count")) {
             results = results

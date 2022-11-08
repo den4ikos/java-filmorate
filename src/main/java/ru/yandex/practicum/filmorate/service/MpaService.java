@@ -22,13 +22,7 @@ public class MpaService {
         return mpaStorage.getById(id);
     }
 
-    public List<Mpa> get() {
-        List<Mpa> mpaList = new ArrayList<>();
-        Map<Long, Mpa> mpaFromQuery = mpaStorage.get();
-        if (!mpaFromQuery.isEmpty()) {
-            mpaList.addAll(mpaFromQuery.values());
-        }
-
-         return mpaList;
+    public List<Mpa> getAll() {
+         return mpaStorage.getAll();
     }
 }

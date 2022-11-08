@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Component("dbFilmStorage")
+@Component
 @Primary
 @AllArgsConstructor
 public class FilmDbStorage implements FilmStorage {
@@ -96,7 +96,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> find(Map<String, String> params) {
+    public List<Film> findAllByParams(Map<String, String> params) {
         StringBuilder sql = new StringBuilder("SELECT films.*, mpa.name as mpa_name ");
         String selectMpa = " LEFT JOIN motion_picture_associations mpa ON (films.mpa_id = mpa.id) ";
         int count = params.containsKey("count") ? Integer.parseInt(params.get("count")) : 10;
