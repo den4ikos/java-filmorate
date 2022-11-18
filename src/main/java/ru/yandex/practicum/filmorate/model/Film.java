@@ -4,8 +4,7 @@ import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Data
 public class Film {
@@ -26,6 +25,13 @@ public class Film {
     @NotNull
     @Positive(message = "Duration must be positive value!")
     private Integer duration;
+
+    private Integer rate;
+
+    @NotNull(message = "MPA is required")
+    private Map<String, Object> mpa = new LinkedHashMap<>();
+
+    private Set<Map<String, Object>> genres = new LinkedHashSet<>();
 
     private Set<Long> likes = new HashSet<>();
 

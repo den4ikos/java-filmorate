@@ -30,4 +30,9 @@ public class User {
     public void setFriends(Long friendId) {
         friends.add(friendId);
     }
+
+    public void deleteFriends(User friend) {
+        friend.getFriends().remove(id);
+        this.getFriends().remove(friend.getId());
+    }
 }
